@@ -5,10 +5,8 @@ import os
 import argparse
 import subprocess
 import tarfile
+import pullbundle
 import submodule_commits
-import string
-import random
-import shutil
 
 parser = argparse.ArgumentParser(description='Create bundles for submodules (recursively), \
                                               to facilitate sneakernet connections. On the online computer, \
@@ -26,4 +24,19 @@ temp_dir = f'temp_dir_for_{tar_file_name}_extraction'
 with tarfile.open(args.filename, 'r:') as tar:
     tar.extractall(temp_dir)
 
-subprocess.run(['git', 'bundle', 'unbundle', f'{temp_dir}/..bundle'])
+my_new_root_dir = os.getcwd()
+
+pullbundle.pullbundle(f'{temp_dir}/..bundle', True)
+for submodule in submodule_commits.submodule_commits():
+    subdir = submodule["subdir"]
+    commit = submodule["commit"]
+    print(f'{subdir} -> {commit}')
+    os.chdir(subdir)
+    route_to_root = (subdir.count('/') + 1) * '../'
+    bundle_file = f'{route_to_root}{temp_dir}/{subdir}.bundle'
+    if not os.path.isfile(bundle_file):
+        print(f'Skipping submodule {subdir} because there is no bundle')
+    else:
+        pullbundle.pullbundle(bundle_file)
+    os.chdir(my_new_root_dir)
+

@@ -10,8 +10,9 @@ def print_submodule_commits(root_subdir, root_commit):
     for result in submodule_commits(root_subdir, root_commit):
         print(f'{result["subdir"]} {result["commit"]}')
 
-def submodule_commits(subdir, commit, prefix=''):
-    if subdir != '.':
+def submodule_commits(subdir='.', commit='HEAD', prefix=''):
+    is_subdir = subdir != '.'
+    if is_subdir:
         previous_dir = os.getcwd()
         os.chdir(subdir)
     git_ls_tree = subprocess.check_output(['git', 'ls-tree', '-r', commit])
@@ -27,7 +28,7 @@ def submodule_commits(subdir, commit, prefix=''):
                 submodule_prefix = f'{prefix}/{subdirectory}'
             yield {'subdir': submodule_prefix, 'commit': commit_hash}
             yield from submodule_commits(subdirectory, commit_hash, submodule_prefix)
-    if subdir != '.':
+    if is_subdir:
         os.chdir(previous_dir)
 
 if __name__ == "__main__":
@@ -36,3 +37,4 @@ if __name__ == "__main__":
                         help='commit to examine; defaults to HEAD')
     args = parser.parse_args()
     print_submodule_commits('.', args.commit)
+

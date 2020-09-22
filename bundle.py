@@ -73,7 +73,8 @@ def create_bundle(submodule_dir, new_commit_sha, baseline_descriptor=''):
         random_id = ''.join(random.choices(string.ascii_lowercase, k=22))  # random to avoid overwriting your branches
         current_branch = f'tmp_branch_{random_id}'
         subprocess.run(['git', 'branch', '-f', current_branch, new_commit_sha])
-    subprocess.run(['git', 'bundle', 'create', route_to_root + bundle_path, f'{baseline_descriptor}{current_branch}'])
+    subprocess.run(['git', 'bundle', 'create', route_to_root + bundle_path,
+                   f'{baseline_descriptor}{current_branch}', '--tags'])
     if need_to_create_branch:
         subprocess.run(['git', 'branch', '-D', current_branch, '--quiet'])  # if we made it, we clean it up
     bundles.append(bundle_path_in_temp)
