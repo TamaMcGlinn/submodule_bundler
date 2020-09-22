@@ -66,17 +66,8 @@ def create_bundle(submodule_dir, new_commit_sha, baseline_descriptor=''):
     os.chdir(submodule_dir)
     rev_parse_output = subprocess.check_output(['git', 'rev-parse', '--abbrev-ref', 'HEAD'])
     current_branch = rev_parse_output.decode("utf-8").strip('\n')
-    need_to_create_branch = (current_branch == 'HEAD')
-    if need_to_create_branch:
-        # Create branch as workaround for git bundle not working on sha's directly
-        # see also stackoverflow.com/questions/42542005/error-trying-to-create-a-git-bundle-ranged-between-2-commits
-        random_id = ''.join(random.choices(string.ascii_lowercase, k=22))  # random to avoid overwriting your branches
-        current_branch = f'tmp_branch_{random_id}'
-        subprocess.run(['git', 'branch', '-f', current_branch, new_commit_sha])
     subprocess.run(['git', 'bundle', 'create', route_to_root + bundle_path,
                    f'{baseline_descriptor}{current_branch}', '--tags'])
-    if need_to_create_branch:
-        subprocess.run(['git', 'branch', '-D', current_branch, '--quiet'])  # if we made it, we clean it up
     bundles.append(bundle_path_in_temp)
     os.chdir(root_dir)
 
@@ -113,5 +104,5 @@ with tarfile.open(args.filename, mode="w:") as tar:  # no compression; git alrea
     os.chdir(root_dir)
 
 print("Removing temp directory")
-shutil.rmtree(f'{root_dir}/{temp_dir}')
+shutil.rmtree(temp_dir)
 
