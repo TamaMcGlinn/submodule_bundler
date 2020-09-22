@@ -64,6 +64,9 @@ def update_branch(branch, commit, check_divergence=False):
 
 def pullbundle(bundle_file, check_divergence=False):
     """ Main function; update all branches from given bundle file """
+    global head_commit
+    head_commit = None
+
     subprocess.run(['git', 'fetch', bundle_file, '+refs/tags/*:refs/tags/*'], stderr=subprocess.DEVNULL)
     unbundle_output = subprocess.check_output(['git', 'bundle', 'unbundle', bundle_file])
     bundle_refs = filter(None, unbundle_output.decode("utf-8").split('\n'))
