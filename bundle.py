@@ -93,7 +93,10 @@ for submodule_dir, commit_sha in new_submodules.items():
 # the bundle of the top-level repository itself is oddly called '..bundle'
 # it is impossible to have a submodule that clashes with this
 # because you cannot name a directory '.'
-create_bundle('.', target)
+baseline_descriptor = ''
+if not full_histories:
+    baseline_descriptor = f'{baseline}..'
+create_bundle('.', target, baseline_descriptor)
 
 print("Packing bundles into tarfile:")
 with tarfile.open(args.filename, mode="w:") as tar:  # no compression; git already does that
