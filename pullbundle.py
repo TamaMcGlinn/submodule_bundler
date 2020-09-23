@@ -62,6 +62,9 @@ def update_branch(branch, commit, check_divergence=False):
                 if current_branch == branch and check_divergence:
                     raise UnableToFastForwardError("Unable to update branch: diverged from bundle") from None
 
+def checkout(commit):
+    subprocess.run(['git', 'checkout', '-q', '-f', commit])
+
 def pullbundle(bundle_file, check_divergence=False):
     """ Main function; update all branches from given bundle file """
     global head_commit
@@ -79,12 +82,13 @@ def pullbundle(bundle_file, check_divergence=False):
         else:
             print(f'Created {branch} pointing at {commit}')
             subprocess.run(['git', 'branch', branch, commit])
+            checkout(commit)
 
     if head_commit is not None:
         # checkout as detached head without branch
         # note this might not happen; if the bundle updates a bunch of branches
         # then whichever one we were already on is updated already and we don't need to do anything here
-        subprocess.run(['git', 'checkout', head_commit])
+        checkout(head_commit)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Update all branches and tags contained in a bundle file')
